@@ -1,9 +1,6 @@
-package models
+package dtos
 
-import "github.com/kamva/mgm/v3"
-
-type UserConfig struct {
-	mgm.DefaultModel `bson:",inline"`
+type UserConfigDto struct {
 
 	Username string `json:"username" bson:"username"`
 	AutoplayOn bool `json:"autoplayOn" bson:"autoplayOn"`
@@ -11,8 +8,8 @@ type UserConfig struct {
 	PreferredColor string `json:"preferredColor" bson:"preferredColor"`
 }
 
-func NewUserConfig(username string ,autoplay bool, newDownloadRoute string, newPreferredColor string) *UserConfig{
-	return &UserConfig{
+func NewUserConfig(username string ,autoplay bool, newDownloadRoute string, newPreferredColor string) UserConfigDto{
+	return UserConfigDto{
 		Username: username,
 		AutoplayOn: autoplay,
 		DownloadRoute: newDownloadRoute,
