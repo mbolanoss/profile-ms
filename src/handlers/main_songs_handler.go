@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"net/http"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/kamva/mgm/v3"
@@ -54,7 +55,12 @@ func AddReproduction(ctx *fiber.Ctx) error {
 		return ctx.Status(http.StatusBadRequest).SendString("Username does not exist")
 	}
 
-	mainSongsList.Songs[addReproductionDto.SongId] += 1
+	// Adding 1 to reproductions counter and replacing update date
+	currentReproduction := mainSongsList.Songs[addReproductionDto.SongId]
+	currentReproduction.Reproductions += 1
+	currentReproduction.LastUpdate = time.Now()
+	mainSongsList.Songs[addReproductionDto.SongId] = currentReproduction
+
 	err = mgm.Coll(&mainSongsList).Update(&mainSongsList)
 
 	if err != nil{
@@ -80,10 +86,16 @@ func GetTopPlayedSongs(ctx *fiber.Ctx) error {
 		return ctx.Status(http.StatusBadRequest).SendString("Username does not exist")
 	}
 
-	
+	// Sorting
 	const NUMBER_OF_SONGS int = 5 
 
-	sorted := helpers.SortMap(mainSongsList.Songs)
+	songs := make(map[int]int)
+
+	for key, value := range mainSongsList.Songs {
+		songs[key] = value.Reproductions
+	}
+
+	sorted := helpers.SortMap(songs)
 	sorted = sorted[len(mainSongsList.Songs) - NUMBER_OF_SONGS:]
 	
 	// Key: songID - Value: number of reproductions
