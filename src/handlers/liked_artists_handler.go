@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"net/http"
 	"profile-ms/models"
 
@@ -51,7 +52,7 @@ func CreateLikedArtistsList(ctx *fiber.Ctx) error {
 	likedArtistsList := models.NewLikedArtistList(username)
 
 	//The list is saved in the DB
-	err := mgm.Coll(likedArtistsList).Create(likedArtistsList)
+	_, err := mgm.Coll(likedArtistsList).InsertOne(context.TODO(), likedArtistsList)
 
 	if err != nil {
 		return ctx.Status(http.StatusInternalServerError).SendString("Error while creating the user's liked artists list in the DB")
@@ -106,6 +107,11 @@ func DeleteArtist(ctx *fiber.Ctx) error {
 			// Delete artist from the list
 			likedArtistsList.Artists = models.DeleteArtist(likedArtistsList.Artists, index)
 			break
+		}
+
+		// If artist not found
+		if index == len(likedArtistsList.Artists) - 1 {
+			return ctx.Status(http.StatusBadRequest).SendString("Artist does not exist")
 		}
 	}
 

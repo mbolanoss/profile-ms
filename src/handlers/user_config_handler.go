@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"profile-ms/dtos"
 	"profile-ms/models"
 
@@ -32,7 +33,8 @@ func CreateUserConfig(ctx *fiber.Ctx) error {
 	userConfig.DownloadRoute = "/downloads"
 	userConfig.PreferredColor = "White"
 
-	if err = mgm.Coll(userConfig).Create(userConfig); err != nil{
+	_ ,err = mgm.Coll(userConfig).InsertOne(context.TODO(), userConfig)
+	if err != nil{
 		return ctx.Status(http.StatusInternalServerError).SendString("Error while creating the user config in the DB")
 	}
 
