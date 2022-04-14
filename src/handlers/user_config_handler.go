@@ -33,7 +33,7 @@ func CreateUserConfig(ctx *fiber.Ctx) error {
 	userConfig.PreferredColor = "White"
 
 	if err = mgm.Coll(userConfig).Create(userConfig); err != nil{
-		return ctx.Status(http.StatusInternalServerError).SendString("Error while saving the user config in the DB")
+		return ctx.Status(http.StatusInternalServerError).SendString("Error while creating the user config in the DB")
 	}
 
 	return ctx.SendStatus(http.StatusOK)
@@ -48,7 +48,7 @@ func UpdateUserConfig(ctx *fiber.Ctx) error {
 	}
 
 	var userConfig models.UserConfig
-	err = mgm.Coll(&userConfig).First(bson.M{"username" : userConfigDto.Username},&userConfig)
+	err = mgm.Coll(&userConfig).First(bson.M{"username" : userConfigDto.Username}, &userConfig)
 
 	if err != nil{
 		return ctx.Status(http.StatusBadRequest).SendString("User does not exist")
