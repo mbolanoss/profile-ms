@@ -14,7 +14,7 @@ func SetupLikedArtistsRoutes(app *fiber.App){
 	// Used to fetch all the liked artists from an user
 	app.Get("/likedArtists", GetLikedArtists)
 
-	// Used to create the collection for a new user
+	// Used to create the list in the DB
 	app.Post("/likedArtists/create", CreateLikedArtistsList)
 
 	// Used to add a new liked artist to a user's list

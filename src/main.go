@@ -3,11 +3,11 @@ package main
 import (
 	"fmt"
 
-	"profile-ms/handlers"
-
 	"github.com/gofiber/fiber/v2"
 	"github.com/kamva/mgm/v3"
 	"go.mongodb.org/mongo-driver/mongo/options"
+
+	"profile-ms/handlers"
 )
 
 func initDB(){
@@ -20,11 +20,13 @@ func initDB(){
 }
 
 func main(){
+
 	app := fiber.New()
 	initDB()
 
 	handlers.SetupLikedArtistsRoutes(app)
 	handlers.SetupUserConfigRoutes(app)
+	handlers.SetupMainSongsRoutes(app)
 
 	app.Listen(":3000")
 
