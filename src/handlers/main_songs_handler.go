@@ -82,21 +82,35 @@ func GetTopPlayedSongs(ctx *fiber.Ctx) error {
 	var mainSongsList models.MainSongsList
 
 	err = mgm.Coll(&mainSongsList).First(bson.M{"username" : topPlayedSongsDto.Username}, &mainSongsList)
+
 	if err != nil {
 		return ctx.Status(http.StatusBadRequest).SendString("Username does not exist")
 	}
 
-	// Sorting
-	const NUMBER_OF_SONGS int = 5 
+	//Time gap filtering
+	filteredSongs := make(map[int]models.Reproduction)
 
-	songs := make(map[int]int)
+	for songId, reproduction := range mainSongsList.Songs {
+		lastUpdate := reproduction.LastUpdate
+		newDate :=lastUpdate.AddDate(0, 0, topPlayedSongsDto.Gap)
 
-	for key, value := range mainSongsList.Songs {
-		songs[key] = value.Reproductions
+		if(newDate.After(time.Now())){
+			filteredSongs[songId] = reproduction
+		}
 	}
 
+	// Sorting
+	songs := make(map[int]int)
+	for key, value := range filteredSongs {
+		songs[key] = value.Reproductions
+	}
 	sorted := helpers.SortMap(songs)
-	sorted = sorted[len(mainSongsList.Songs) - NUMBER_OF_SONGS:]
+
+	const NUMBER_OF_SONGS int = 5 
+
+	if len(sorted) > NUMBER_OF_SONGS {
+		sorted = sorted[len(filteredSongs) - NUMBER_OF_SONGS:]
+	}
 	
 	// Key: songID - Value: number of reproductions
 	return ctx.JSON(fiber.Map{

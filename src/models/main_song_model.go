@@ -9,7 +9,7 @@ import (
 
 type Reproduction struct {
 	Reproductions int `json:"reproductions" bson:"reproductions"`
-	LastUpdate time.Time `json:"lastUpdate" bson:"LastUpdate"`
+	LastUpdate time.Time `json:"lastUpdate" bson:"lastUpdate"`
 }
 type MainSongsList struct {
 	mgm.DefaultModel `bson:",inline"`
