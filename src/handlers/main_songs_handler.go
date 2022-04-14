@@ -56,10 +56,11 @@ func AddReproduction(ctx *fiber.Ctx) error {
 	}
 
 	// Adding 1 to reproductions counter and replacing update date
-	currentReproduction := playedSongsList.Songs[addReproductionDto.SongId]
-	currentReproduction.Reproductions += 1
-	currentReproduction.LastUpdate = time.Now()
-	playedSongsList.Songs[addReproductionDto.SongId] = currentReproduction
+	currentSong := playedSongsList.Songs[addReproductionDto.SongId]
+	currentSong.Reproductions += 1
+	currentSong.ArtistName = addReproductionDto.ArtistName
+	currentSong.LastUpdate = time.Now()
+	playedSongsList.Songs[addReproductionDto.SongId] = currentSong
 
 	err = mgm.Coll(&playedSongsList).Update(&playedSongsList)
 
@@ -73,26 +74,26 @@ func AddReproduction(ctx *fiber.Ctx) error {
 func GetTopPlayedSongs(ctx *fiber.Ctx) error {
 	var err error
 
-	topPlayedSongsDto := new(dtos.TopPlayedSongsDto)
-	err = ctx.BodyParser(topPlayedSongsDto)
+	topPlayedDto := new(dtos.TopPlayedDto)
+	err = ctx.BodyParser(topPlayedDto)
 	if err != nil {
 		ctx.Status(http.StatusInternalServerError).SendString("Error parsing top played songs body")
 	}
 
 	var playedSongsList models.PlayedSongsList
 
-	err = mgm.Coll(&playedSongsList).First(bson.M{"username" : topPlayedSongsDto.Username}, &playedSongsList)
+	err = mgm.Coll(&playedSongsList).First(bson.M{"username" : topPlayedDto.Username}, &playedSongsList)
 
 	if err != nil {
 		return ctx.Status(http.StatusBadRequest).SendString("Username does not exist")
 	}
 
 	//Time gap filtering
-	filteredSongs := make(map[int]models.Reproduction)
+	filteredSongs := make(map[int]models.SongInfo)
 
 	for songId, reproduction := range playedSongsList.Songs {
 		lastUpdate := reproduction.LastUpdate
-		newDate :=lastUpdate.AddDate(0, 0, topPlayedSongsDto.Gap)
+		newDate :=lastUpdate.AddDate(0, 0, topPlayedDto.Gap)
 
 		if(newDate.After(time.Now())){
 			filteredSongs[songId] = reproduction
@@ -104,7 +105,7 @@ func GetTopPlayedSongs(ctx *fiber.Ctx) error {
 	for key, value := range filteredSongs {
 		songs[key] = value.Reproductions
 	}
-	sorted := helpers.SortMap(songs)
+	sorted := helpers.SortMapInt_Int(songs)
 
 	const NUMBER_OF_SONGS int = 5 
 

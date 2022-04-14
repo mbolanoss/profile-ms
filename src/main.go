@@ -19,14 +19,19 @@ func initDB(){
 	}
 }
 
+func SetupAllRoutes(app *fiber.App){
+	handlers.SetupLikedArtistsRoutes(app)
+	handlers.SetupUserConfigRoutes(app)
+	handlers.SetupMainSongsRoutes(app)
+	handlers.SetupPlayedArtistsRoutes(app)
+}
+
 func main(){
 
 	app := fiber.New()
 	initDB()
 
-	handlers.SetupLikedArtistsRoutes(app)
-	handlers.SetupUserConfigRoutes(app)
-	handlers.SetupMainSongsRoutes(app)
+	SetupAllRoutes(app)
 
 	app.Listen(":3000")
 
