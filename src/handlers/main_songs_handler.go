@@ -16,25 +16,25 @@ import (
 
 func SetupMainSongsRoutes(app *fiber.App){
 	// Used to create the list in the DB
-	app.Post("/mainSongs", CreateMainSongsList)
+	app.Post("/playedSongs", CreatePlayedSongsList)
 
 	// Used to add 1 to the number of reproductions of a song
-	app.Put("/mainSongs", AddReproduction)
+	app.Put("/playedSongs", AddReproduction)
 
 	// Used to get the top played songs
-	app.Get("/mainSongs", GetTopPlayedSongs)
+	app.Get("/playedSongs", GetTopPlayedSongs)
 }
 
-func CreateMainSongsList(ctx *fiber.Ctx) error {
+func CreatePlayedSongsList(ctx *fiber.Ctx) error {
 	username := ctx.Query("username")
 
 	if username == "" {
 		return ctx.Status(http.StatusBadRequest).SendString("No username query found in url")
 	}
 
-	mainSongsList := models.NewMainSongsList(username)
+	playedSongsList := models.NewPlayedSongsList(username)
 
-	mgm.Coll(mainSongsList).InsertOne(context.TODO(), mainSongsList)
+	mgm.Coll(playedSongsList).InsertOne(context.TODO(), playedSongsList)
 
 	return ctx.SendStatus(http.StatusOK)
 }
@@ -48,20 +48,20 @@ func AddReproduction(ctx *fiber.Ctx) error {
 		ctx.Status(http.StatusInternalServerError).SendString("Error parsing add reproduction body")
 	}
 
-	var mainSongsList models.MainSongsList
+	var playedSongsList models.PlayedSongsList
 
-	err = mgm.Coll(&mainSongsList).First(bson.M{"username" : addReproductionDto.Username}, &mainSongsList)
+	err = mgm.Coll(&playedSongsList).First(bson.M{"username" : addReproductionDto.Username}, &playedSongsList)
 	if err != nil {
 		return ctx.Status(http.StatusBadRequest).SendString("Username does not exist")
 	}
 
 	// Adding 1 to reproductions counter and replacing update date
-	currentReproduction := mainSongsList.Songs[addReproductionDto.SongId]
+	currentReproduction := playedSongsList.Songs[addReproductionDto.SongId]
 	currentReproduction.Reproductions += 1
 	currentReproduction.LastUpdate = time.Now()
-	mainSongsList.Songs[addReproductionDto.SongId] = currentReproduction
+	playedSongsList.Songs[addReproductionDto.SongId] = currentReproduction
 
-	err = mgm.Coll(&mainSongsList).Update(&mainSongsList)
+	err = mgm.Coll(&playedSongsList).Update(&playedSongsList)
 
 	if err != nil{
 		return ctx.Status(http.StatusInternalServerError).SendString("Error while updating song's number of reproductions in the DB")
@@ -79,9 +79,9 @@ func GetTopPlayedSongs(ctx *fiber.Ctx) error {
 		ctx.Status(http.StatusInternalServerError).SendString("Error parsing top played songs body")
 	}
 
-	var mainSongsList models.MainSongsList
+	var playedSongsList models.PlayedSongsList
 
-	err = mgm.Coll(&mainSongsList).First(bson.M{"username" : topPlayedSongsDto.Username}, &mainSongsList)
+	err = mgm.Coll(&playedSongsList).First(bson.M{"username" : topPlayedSongsDto.Username}, &playedSongsList)
 
 	if err != nil {
 		return ctx.Status(http.StatusBadRequest).SendString("Username does not exist")
@@ -90,7 +90,7 @@ func GetTopPlayedSongs(ctx *fiber.Ctx) error {
 	//Time gap filtering
 	filteredSongs := make(map[int]models.Reproduction)
 
-	for songId, reproduction := range mainSongsList.Songs {
+	for songId, reproduction := range playedSongsList.Songs {
 		lastUpdate := reproduction.LastUpdate
 		newDate :=lastUpdate.AddDate(0, 0, topPlayedSongsDto.Gap)
 

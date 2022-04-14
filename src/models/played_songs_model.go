@@ -11,7 +11,7 @@ type Reproduction struct {
 	Reproductions int `json:"reproductions" bson:"reproductions"`
 	LastUpdate time.Time `json:"lastUpdate" bson:"lastUpdate"`
 }
-type MainSongsList struct {
+type PlayedSongsList struct {
 	mgm.DefaultModel `bson:",inline"`
 
 	Username string `json:"username" bson:"username"`
@@ -19,8 +19,8 @@ type MainSongsList struct {
 	Songs map[int]Reproduction `json:"songsList" bson:"songsList"`
 }
 
-func NewMainSongsList (username string) *MainSongsList {
-	return &MainSongsList{
+func NewPlayedSongsList (username string) *PlayedSongsList {
+	return &PlayedSongsList{
 		Username: username,
 		Songs: make(map[int]Reproduction),
 	}
