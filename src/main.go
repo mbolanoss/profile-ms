@@ -26,12 +26,17 @@ func SetupAllRoutes(app *fiber.App){
 	handlers.SetupPlayedArtistsRoutes(app)
 }
 
+func dockerTest(ctx *fiber.Ctx) error {
+	return ctx.SendString("Docker test")
+}
+
 func main(){
 
 	app := fiber.New()
 	initDB()
 
 	SetupAllRoutes(app)
+	app.Get("/", dockerTest)
 
 	app.Listen(":3000")
 
