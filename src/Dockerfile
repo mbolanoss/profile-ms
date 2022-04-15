@@ -16,3 +16,7 @@ RUN go build
 EXPOSE 3000
 
 ENTRYPOINT [ "/code/profile-ms" ]
+
+# Build and run image commands
+# sudo docker build -t profiles-ms .
+# docker run -p 3000:3000 -tid profiles-ms
