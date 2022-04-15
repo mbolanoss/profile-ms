@@ -20,10 +20,16 @@ func initDB(){
 	}
 
 	DB_NAME := os.Getenv("DB_NAME")
-	DB_HOST := os.Getenv("DB_HOST")
-	DB_PORT := os.Getenv("DB_PORT")
+	DB_PASS := os.Getenv("DB_PASS")
+	
+	// Local DB
+	//dbURL := fmt.Sprintf("mongodb://%s:%s", DB_HOST, DB_PORT)
+	//DB_HOST := os.Getenv("DB_HOST")
+	//DB_PORT := os.Getenv("DB_PORT")
 
-	dbURL := fmt.Sprintf("mongodb://%s:%s", DB_HOST, DB_PORT)
+	//Deployed DB
+	dbURL := fmt.Sprintf("mongodb+srv://root:%s@cluster0.lno2t.mongodb.net/%s?retryWrites=true&w=majority", DB_PASS, DB_NAME)
+	
 	err = mgm.SetDefaultConfig(nil, DB_NAME,options.Client().ApplyURI(dbURL));
 
 	if err != nil{
