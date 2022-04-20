@@ -13,6 +13,10 @@ import (
 )
 
 func SetupUserConfigRoutes(app *fiber.App){
+
+	//Used to fetch user config
+	app.Get("/userConfig", GetUserConfig)
+
 	// Used when creating an user, in order to save default config
 	app.Post("/userConfig", CreateUserConfig)
 
@@ -69,4 +73,26 @@ func UpdateUserConfig(ctx *fiber.Ctx) error {
 	}
 
 	return ctx.SendStatus(http.StatusOK)
+}
+
+func GetUserConfig(ctx *fiber.Ctx) error {
+
+	username := ctx.Query("username")
+
+	if username == "" {
+		return ctx.Status(http.StatusBadRequest).SendString("No username query found")
+	}
+
+	var userConfig models.UserConfig
+	err := mgm.Coll(&userConfig).First(bson.M{"username" : username}, &userConfig)
+
+	if err != nil{
+		return ctx.Status(http.StatusBadRequest).SendString("User does not exist")
+	}
+
+	return ctx.JSON(bson.M{
+		"autoplayOn" : userConfig.AutoplayOn,
+		"downloadRoute" : userConfig.DownloadRoute,
+		"preferredColor" : userConfig.PreferredColor,
+	})
 }
